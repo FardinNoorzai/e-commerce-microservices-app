@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -115,6 +117,14 @@ public class ProductService {
             default:
                 return null;
         }
+    }
+
+    public Optional<Product> findById(Integer id){
+        return productRepository.findById(id);
+    }
+
+    public List<Product> findAll(){
+        return productRepository.findAll();
     }
 
 }

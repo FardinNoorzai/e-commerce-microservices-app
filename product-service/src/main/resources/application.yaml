@@ -25,6 +25,7 @@ spring:
     resources:
       static-locations: file:/home/noorzai/uploads/images/
 
+
 logging:
   level:
     org.springframework.web: DEBUG
