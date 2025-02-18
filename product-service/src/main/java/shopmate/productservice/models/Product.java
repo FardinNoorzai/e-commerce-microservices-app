@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.ToString;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @ToString
@@ -30,6 +31,8 @@ public class Product {
     private String imageUrl;
     private String MimeType;
     private String extension;
+    @OneToMany(mappedBy = "product")
+    List<Review> reviews;
 
     @NotNull(message = "Active status is required")
     private Boolean isActive;
@@ -121,11 +124,11 @@ public class Product {
         this.extension = extension;
     }
 
-    public @NotNull(message = "Active status is required") Boolean getActive() {
+    public Boolean getActive() {
         return isActive;
     }
 
-    public void setActive(@NotNull(message = "Active status is required") Boolean active) {
+    public void setActive(Boolean active) {
         isActive = active;
     }
 
@@ -136,4 +139,13 @@ public class Product {
     public void setProductCategory(ProductCategory productCategory) {
         this.productCategory = productCategory;
     }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
 }
+

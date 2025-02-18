@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@RepositoryRestResource(path = "products")
+@RepositoryRestResource(path = "products",collectionResourceRel = "products")
 public interface ProductRepository extends JpaRepository<Product, Integer> {
     public Product findByImageUrl(String imageUrl);
     public Optional<Product> findById(Integer productId);
