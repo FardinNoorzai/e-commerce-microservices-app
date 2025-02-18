@@ -2,12 +2,8 @@ package shopmate.productservice.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Builder;
 import lombok.ToString;
-
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
 
 @Entity
 @ToString
