@@ -38,6 +38,9 @@ public class Product {
     @NotNull(message = "Active status is required")
     private Boolean isActive;
 
+
+    @ManyToOne
+    ProductCategory productCategory;
     public Product() {}
 
     public Product(String name, String description, BigDecimal price, String brand, String imageUrl,Boolean isActive) {
@@ -128,5 +131,13 @@ public class Product {
 
     public void setActive(@NotNull(message = "Active status is required") Boolean active) {
         isActive = active;
+    }
+
+    public ProductCategory getProductCategory() {
+        return productCategory;
+    }
+
+    public void setProductCategory(ProductCategory productCategory) {
+        this.productCategory = productCategory;
     }
 }
