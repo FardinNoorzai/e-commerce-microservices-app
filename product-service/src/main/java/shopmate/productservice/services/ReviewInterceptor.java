@@ -6,7 +6,7 @@ import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 import shopmate.productservice.models.Review;
 
-@RepositoryEventHandler
+@RepositoryEventHandler(Review.class)
 @Component
 public class ReviewInterceptor {
 
