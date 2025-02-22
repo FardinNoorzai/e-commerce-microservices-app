@@ -1,7 +1,7 @@
 package com.fardin.orderservice.converters;
 
 import com.fardin.orderservice.models.Order;
-import com.shopmate.OrderDto;
+import com.shopmate.dtos.OrderDto;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 

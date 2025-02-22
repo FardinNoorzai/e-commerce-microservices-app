@@ -4,7 +4,7 @@ import com.fardin.orderservice.converters.OrderConvertor;
 import com.fardin.orderservice.message.publishers.NewOrderPublishers;
 import com.fardin.orderservice.models.Order;
 import com.fardin.orderservice.states.OrderStatus;
-import com.shopmate.OrderDto;
+import com.shopmate.dtos.OrderDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
@@ -29,7 +29,7 @@ public class OrderCreationInterceptor {
     }
     @HandleAfterCreate
     public void handleAfterCreate(Order order) {
-        com.shopmate.OrderDto dto = orderConvertor.convert(order);
+        OrderDto dto = orderConvertor.convert(order);
         newOrderPublishers.publishNewOrder("order",dto);
     }
 }
