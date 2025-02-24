@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 public class InventoryService {
@@ -21,14 +22,13 @@ public class InventoryService {
         BigDecimal entries = productEntryRepository.calculateInventoryByProductId(orderDto.getProductId()).orElse(BigDecimal.ZERO);
         BigDecimal transactions = transactionRepository.calculateInventoryByProductIdAndNotRejected(orderDto.getProductId()).orElse(BigDecimal.ZERO);
         BigDecimal total = entries.subtract(transactions);
-        System.out.println(entries.toString());
-        System.out.println(transactions.toString());
         if(total.compareTo(orderDto.getQuantity()) >= 0){
             Transaction transaction = Transaction.builder()
                     .state(InventoryStates.HOLD)
                     .orderId(orderDto.getOrderId())
                     .productId(orderDto.getProductId())
                     .quantity(orderDto.getQuantity())
+                    .timestamp(LocalDateTime.now())
                     .username(orderDto.getUserName())
                     .build();
             transaction = transactionRepository.save(transaction);

@@ -4,6 +4,7 @@ import com.shopmate.states.InventoryStates;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Builder
 @Entity
@@ -22,4 +23,5 @@ public class Transaction {
     Integer productId;
     @Enumerated(EnumType.STRING)
     InventoryStates state;
+    LocalDateTime timestamp;
 }

@@ -6,4 +6,5 @@ public enum OrderStatus {
     PAYMENT_SUCCESS,
     SHIPPING,
     SHIPPED_SUCCESS,
+    REJECTED_BY_INVENTORY
 }

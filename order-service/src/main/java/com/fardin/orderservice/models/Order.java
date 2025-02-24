@@ -1,12 +1,17 @@
 package com.fardin.orderservice.models;
 
 import com.fardin.orderservice.states.OrderStatus;
+import com.shopmate.states.InventoryStates;
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "orders")
+@Builder
+
 public class Order {
 
     @Id
@@ -19,6 +24,8 @@ public class Order {
     private Integer productId;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+    @Enumerated(EnumType.STRING)
+    private InventoryStates inventoryStates;
 
 
     @Embedded
@@ -34,20 +41,22 @@ public class Order {
     LocalDateTime updatedAt;
     LocalDateTime shippedAt;
 
-    public Order(String id, String username, BigDecimal totalAmount, BigDecimal quantity, BigDecimal price, OrderStatus status, Address shippingAddress, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime shippedAt) {
+    public Order() {
+    }
+
+    public Order(String id, String username, BigDecimal totalAmount, BigDecimal quantity, BigDecimal price, Integer productId, OrderStatus status, InventoryStates inventoryStates, Address shippingAddress, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime shippedAt) {
         this.id = id;
         this.username = username;
         this.totalAmount = totalAmount;
         this.quantity = quantity;
         this.price = price;
+        this.productId = productId;
         this.status = status;
+        this.inventoryStates = inventoryStates;
         this.shippingAddress = shippingAddress;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.shippedAt = shippedAt;
-    }
-    public Order() {
-
     }
 
     public String getId() {
@@ -90,12 +99,28 @@ public class Order {
         this.price = price;
     }
 
+    public Integer getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Integer productId) {
+        this.productId = productId;
+    }
+
     public OrderStatus getStatus() {
         return status;
     }
 
     public void setStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    public InventoryStates getInventoryStates() {
+        return inventoryStates;
+    }
+
+    public void setInventoryStates(InventoryStates inventoryStates) {
+        this.inventoryStates = inventoryStates;
     }
 
     public Address getShippingAddress() {
@@ -130,24 +155,17 @@ public class Order {
         this.shippedAt = shippedAt;
     }
 
-    public Integer getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Integer productId) {
-        this.productId = productId;
-    }
-
     @Override
     public String toString() {
         return "Order{" +
                 "id='" + id + '\'' +
-                ", userId='" + username + '\'' +
+                ", username='" + username + '\'' +
                 ", totalAmount=" + totalAmount +
                 ", quantity=" + quantity +
                 ", price=" + price +
                 ", productId=" + productId +
                 ", status=" + status +
+                ", inventoryStates=" + inventoryStates +
                 ", shippingAddress=" + shippingAddress +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
