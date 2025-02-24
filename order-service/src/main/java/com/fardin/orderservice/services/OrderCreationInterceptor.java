@@ -11,6 +11,7 @@ import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @RepositoryEventHandler(Order.class)
@@ -30,6 +31,7 @@ public class OrderCreationInterceptor {
     @HandleAfterCreate
     public void handleAfterCreate(Order order) {
         OrderDto dto = orderConvertor.convert(order);
+        System.out.println("publishing to kafka");
         newOrderPublishers.publishNewOrder("order",dto);
     }
 }

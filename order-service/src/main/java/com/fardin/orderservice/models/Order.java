@@ -6,26 +6,29 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "orders")
 @Builder
-
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String username;
-    private BigDecimal totalAmount;
-    private BigDecimal quantity;
-    private BigDecimal price;
+    private BigInteger totalAmount;
+    private BigInteger quantity;
+    private BigInteger price;
     private Integer productId;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     @Enumerated(EnumType.STRING)
     private InventoryStates inventoryStates;
+
+    @Column(length = 512)
+    String paymentUrl;
 
 
     @Embedded
@@ -44,7 +47,7 @@ public class Order {
     public Order() {
     }
 
-    public Order(String id, String username, BigDecimal totalAmount, BigDecimal quantity, BigDecimal price, Integer productId, OrderStatus status, InventoryStates inventoryStates, Address shippingAddress, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime shippedAt) {
+    public Order(String id, String username, BigInteger totalAmount, BigInteger quantity, BigInteger price, Integer productId, OrderStatus status, InventoryStates inventoryStates, String paymentUrl, Address shippingAddress, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime shippedAt) {
         this.id = id;
         this.username = username;
         this.totalAmount = totalAmount;
@@ -53,6 +56,7 @@ public class Order {
         this.productId = productId;
         this.status = status;
         this.inventoryStates = inventoryStates;
+        this.paymentUrl = paymentUrl;
         this.shippingAddress = shippingAddress;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -75,27 +79,27 @@ public class Order {
         this.username = username;
     }
 
-    public BigDecimal getTotalAmount() {
+    public BigInteger getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) {
+    public void setTotalAmount(BigInteger totalAmount) {
         this.totalAmount = totalAmount;
     }
 
-    public BigDecimal getQuantity() {
+    public BigInteger getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(BigDecimal quantity) {
+    public void setQuantity(BigInteger quantity) {
         this.quantity = quantity;
     }
 
-    public BigDecimal getPrice() {
+    public BigInteger getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(BigInteger price) {
         this.price = price;
     }
 
@@ -155,6 +159,15 @@ public class Order {
         this.shippedAt = shippedAt;
     }
 
+    public String getPaymentUrl() {
+        return paymentUrl;
+    }
+
+    public void setPaymentUrl(String paymentUrl) {
+        this.paymentUrl = paymentUrl;
+    }
+
+
     @Override
     public String toString() {
         return "Order{" +
@@ -166,6 +179,7 @@ public class Order {
                 ", productId=" + productId +
                 ", status=" + status +
                 ", inventoryStates=" + inventoryStates +
+                ", paymentUrl='" + paymentUrl + '\'' +
                 ", shippingAddress=" + shippingAddress +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +

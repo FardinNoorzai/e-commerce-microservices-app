@@ -16,8 +16,10 @@ public class OrderListener {
     KafkaTemplate<String, InventoryResponseToNewOrderDto> kafkaTemplate;
     @KafkaListener(topics = "order",groupId = "inventory-service-group")
     public void listen(OrderDto message) {
+        System.out.println("Received order: " + message);
         InventoryResponseToNewOrderDto response = inventoryService.calculateInventory(message);
         System.out.println(response);
+        System.out.println("publishing to kafka");
         kafkaTemplate.send("inventory", response);
     }
 

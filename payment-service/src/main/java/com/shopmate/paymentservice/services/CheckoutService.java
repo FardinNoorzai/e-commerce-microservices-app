@@ -1,6 +1,7 @@
 package com.shopmate.paymentservice.services;
 
-import com.shopmate.paymentservice.dtos.CheckoutSessionRequest;
+import com.shopmate.dtos.CheckoutSessionRequestDto;
+import com.shopmate.dtos.PaymentDto;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -24,8 +25,8 @@ public class CheckoutService {
         Stripe.apiKey = stripeKey;
     }
 
-    public ResponseEntity<?> createCheckoutSession(CheckoutSessionRequest request) throws Exception {
-
+    public ResponseEntity<PaymentDto> createCheckoutSession(CheckoutSessionRequestDto request) throws Exception {
+        System.out.println(request);
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("payment_method_types", List.of("card"));
@@ -33,19 +34,23 @@ public class CheckoutService {
                     "price_data", Map.of(
                             "currency", request.getCurrency(),
                             "product_data", Map.of("name", request.getProduct()),
-                            "unit_amount", request.getAmount()
+                            "unit_amount", request.getPrice().intValueExact()
                     ),
-                    "quantity", 1
+                    "quantity", request.getAmount().intValueExact()
             )));
             params.put("mode", "payment");
             params.put("success_url", request.getSuccessUrl());
             params.put("cancel_url", request.getCancelUrl());
 
             Session session = Session.create(params);
-            System.out.println(session.getId());
-            return ResponseEntity.ok(Collections.singletonMap("url", session.getUrl()));
+            PaymentDto paymentDto = new PaymentDto();
+            paymentDto.setPaymentId(session.getId());
+            paymentDto.setUri(session.getUrl());
+            paymentDto.setOrderId(request.getOrderId());
+            return ResponseEntity.ok(paymentDto);
         } catch (StripeException e) {
-            return ResponseEntity.internalServerError().body(Collections.singletonMap("error", e.getMessage()));
+            System.out.println(e.getMessage());
+            return ResponseEntity.internalServerError().body(new PaymentDto());
         }
     }
 

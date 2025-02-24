@@ -13,16 +13,16 @@
         <module name="user-service" />
         <module name="service-discovery" />
       </profile>
-      <profile name="Annotation profile for order-service" enabled="true">
+      <profile name="Annotation profile for payment-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
         </processorPath>
+        <module name="payment-service" />
         <module name="order-service" />
         <module name="inventory-service" />
-        <module name="payment-service" />
       </profile>
     </annotationProcessing>
   </component>

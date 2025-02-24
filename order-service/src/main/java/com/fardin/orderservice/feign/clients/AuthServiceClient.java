@@ -1,4 +1,4 @@
-package com.fardin.orderservice.services;
+package com.fardin.orderservice.feign.clients;
 
 import com.fardin.orderservice.dtos.AuthRequest;
 import org.springframework.cloud.openfeign.FeignClient;

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Service
@@ -19,18 +20,20 @@ public class InventoryService {
     @Autowired
     ProductEntryRepository productEntryRepository;
     public InventoryResponseToNewOrderDto calculateInventory(OrderDto orderDto) {
-        BigDecimal entries = productEntryRepository.calculateInventoryByProductId(orderDto.getProductId()).orElse(BigDecimal.ZERO);
-        BigDecimal transactions = transactionRepository.calculateInventoryByProductIdAndNotRejected(orderDto.getProductId()).orElse(BigDecimal.ZERO);
-        BigDecimal total = entries.subtract(transactions);
+        BigInteger entries = productEntryRepository.calculateInventoryByProductId(orderDto.getProductId()).orElse(BigInteger.ZERO);
+        BigInteger transactions = transactionRepository.calculateInventoryByProductIdAndNotRejected(orderDto.getProductId()).orElse(BigInteger.ZERO);
+        BigInteger total = entries.subtract(transactions);
+        System.out.println("entries: " + entries);
+        System.out.println("transactions: " + transactions);
+        System.out.println("total: " + total);
         if(total.compareTo(orderDto.getQuantity()) >= 0){
-            Transaction transaction = Transaction.builder()
-                    .state(InventoryStates.HOLD)
-                    .orderId(orderDto.getOrderId())
-                    .productId(orderDto.getProductId())
-                    .quantity(orderDto.getQuantity())
-                    .timestamp(LocalDateTime.now())
-                    .username(orderDto.getUserName())
-                    .build();
+            Transaction transaction = new Transaction();
+            transaction.setProductId(orderDto.getProductId());
+            transaction.setQuantity(orderDto.getQuantity());
+            transaction.setState(InventoryStates.HOLD);
+            transaction.setOrderId(orderDto.getOrderId());
+            transaction.setTimestamp(LocalDateTime.now());
+            transaction.setUsername(orderDto.getUserName());
             transaction = transactionRepository.save(transaction);
             InventoryResponseToNewOrderDto response = InventoryResponseToNewOrderDto.builder()
                     .inventoryId(transaction.getId())
