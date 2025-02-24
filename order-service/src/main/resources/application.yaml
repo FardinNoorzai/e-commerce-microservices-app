@@ -31,7 +31,10 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
-
+order:
+  service:
+    username: order-service
+    password: order-123
 
 
 jwt:

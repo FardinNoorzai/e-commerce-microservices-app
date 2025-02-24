@@ -32,7 +32,7 @@ public class CheckoutService {
             params.put("line_items", List.of(Map.of(
                     "price_data", Map.of(
                             "currency", request.getCurrency(),
-                            "product_data", Map.of("name", "Pen"),
+                            "product_data", Map.of("name", request.getProduct()),
                             "unit_amount", request.getAmount()
                     ),
                     "quantity", 1
@@ -42,6 +42,7 @@ public class CheckoutService {
             params.put("cancel_url", request.getCancelUrl());
 
             Session session = Session.create(params);
+            System.out.println(session.getId());
             return ResponseEntity.ok(Collections.singletonMap("url", session.getUrl()));
         } catch (StripeException e) {
             return ResponseEntity.internalServerError().body(Collections.singletonMap("error", e.getMessage()));
