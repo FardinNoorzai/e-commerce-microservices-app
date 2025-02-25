@@ -23,14 +23,14 @@ public class InventoryListener {
     @KafkaListener(topics = "inventory",groupId = "order-service-group")
     public void listen(InventoryResponseToNewOrderDto message) {
         System.out.println("Received new order");
-        Order order = orderService.updateOrderStatus(message);
+        Order order = orderService.updateOrderStatusByInventoryResponse(message);
         if(order != null) {
             if(order.getStatus().equals(OrderStatus.PAYMENT_PENDING)){
                 CheckoutSessionRequestDto dto = orderService.createCheckoutSessionObject(order);
                 System.out.println(dto.getAmount());
                 System.out.println(dto.getPrice());
                 PaymentDto paymentDto = paymentServiceClient.getSession(dto);
-                System.out.println(paymentDto.toString());
+                orderService.updateOrderStatusByPaymentResponse(paymentDto);
             }
         }
     }

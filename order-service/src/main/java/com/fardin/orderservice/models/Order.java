@@ -27,6 +27,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private InventoryStates inventoryStates;
 
+    String paymentId;
     @Column(length = 512)
     String paymentUrl;
 
@@ -47,7 +48,7 @@ public class Order {
     public Order() {
     }
 
-    public Order(String id, String username, BigInteger totalAmount, BigInteger quantity, BigInteger price, Integer productId, OrderStatus status, InventoryStates inventoryStates, String paymentUrl, Address shippingAddress, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime shippedAt) {
+    public Order(String id, String username, BigInteger totalAmount, BigInteger quantity, BigInteger price, Integer productId, OrderStatus status, InventoryStates inventoryStates, String paymentId, String paymentUrl, Address shippingAddress, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime shippedAt) {
         this.id = id;
         this.username = username;
         this.totalAmount = totalAmount;
@@ -56,11 +57,20 @@ public class Order {
         this.productId = productId;
         this.status = status;
         this.inventoryStates = inventoryStates;
+        this.paymentId = paymentId;
         this.paymentUrl = paymentUrl;
         this.shippingAddress = shippingAddress;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.shippedAt = shippedAt;
+    }
+
+    public String getPaymentId() {
+        return paymentId;
+    }
+
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
     }
 
     public String getId() {

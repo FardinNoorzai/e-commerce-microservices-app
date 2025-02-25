@@ -12,6 +12,7 @@
         <module name="product-service" />
         <module name="user-service" />
         <module name="service-discovery" />
+        <module name="shipping-service" />
       </profile>
       <profile name="Annotation profile for payment-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -35,6 +36,7 @@
       <module name="payment-service" options="-parameters" />
       <module name="product-service" options="-parameters" />
       <module name="service-discovery" options="-parameters" />
+      <module name="shipping-service" options="-parameters" />
       <module name="user-service" options="-parameters" />
     </option>
   </component>

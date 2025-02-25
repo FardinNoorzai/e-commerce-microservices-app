@@ -4,10 +4,7 @@ import com.fardin.orderservice.feign.clients.ProductServiceClient;
 import com.fardin.orderservice.models.Order;
 import com.fardin.orderservice.repositories.OrderRepository;
 import com.fardin.orderservice.states.OrderStatus;
-import com.shopmate.dtos.CheckoutSessionRequestDto;
-import com.shopmate.dtos.InventoryResponseToNewOrderDto;
-import com.shopmate.dtos.PaymentDto;
-import com.shopmate.dtos.ProductDto;
+import com.shopmate.dtos.*;
 import com.shopmate.states.InventoryStates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +18,7 @@ public class OrderService {
     ProductServiceClient productServiceClient;
     @Autowired
     OrderRepository orderRepository;
-    public Order updateOrderStatus(InventoryResponseToNewOrderDto inventoryResponse) {
+    public Order updateOrderStatusByInventoryResponse(InventoryResponseToNewOrderDto inventoryResponse) {
         System.out.println("update order status was called");
         Order order = orderRepository.findById(inventoryResponse.getOrderId()).orElse(null);
         if(order == null){
@@ -37,6 +34,29 @@ public class OrderService {
         order.setInventoryStates(inventoryResponse.getInventoryState());
         return orderRepository.save(order);
 
+    }
+    public Order updateOrderStatusByPaymentResponse(PaymentDto paymentDto) {
+        Order order = orderRepository.findById(paymentDto.getOrderId()).orElse(null);
+        if(order == null){
+            return null;
+        }
+        if(paymentDto.getUri() == null){
+            order.setStatus(OrderStatus.REJECTED_BY_PAYMENT);
+        }
+        order.setPaymentUrl(paymentDto.getUri());
+        order.setUpdatedAt(LocalDateTime.now());
+        return orderRepository.save(order);
+    }
+    public void updateOrderByPaymentCompletion(CompletedPaymentDto dto){
+        Order order = orderRepository.findById(dto.getOrderId()).orElse(null);
+        if(order == null){
+            return;
+        }
+        order.setStatus(OrderStatus.SHIPPING);
+        order.setUpdatedAt(LocalDateTime.now());
+        order.setPaymentId(dto.getPaymentId());
+        order.setInventoryStates(InventoryStates.COMPLETED);
+        orderRepository.save(order);
     }
 
     public CheckoutSessionRequestDto createCheckoutSessionObject(Order order){
