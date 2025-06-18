@@ -16,6 +16,8 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    String firstName;
+    String lastName;
 
     @Column(unique = true)
     private String username;
@@ -24,6 +26,23 @@ public class User implements UserDetails {
     private String role;
 
     // Getters and Setters
+
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

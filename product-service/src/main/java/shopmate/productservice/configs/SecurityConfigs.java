@@ -21,7 +21,7 @@ public class SecurityConfigs {
                 csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorizationManagerRequestMatcherRegistry ->{
-                    authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
+                    authorizationManagerRequestMatcherRegistry.requestMatchers("/api/products/images/**").permitAll().anyRequest().authenticated();
                 }))
                 .build();
     }

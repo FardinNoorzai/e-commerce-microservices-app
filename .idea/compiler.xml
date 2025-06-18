@@ -10,26 +10,22 @@
         <module name="api-gateway" />
         <module name="config-server" />
         <module name="product-service" />
+        <module name="cart-service" />
         <module name="user-service" />
         <module name="service-discovery" />
-        <module name="shipping-service" />
-      </profile>
-      <profile name="Annotation profile for payment-service" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
-        </processorPath>
-        <module name="payment-service" />
-        <module name="order-service" />
-        <module name="inventory-service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="inventory-service" target="17" />
+      <module name="order-service" target="17" />
+      <module name="payment-service" target="17" />
+      <module name="shipping-service" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="api-gateway" options="-parameters" />
+      <module name="cart-service" options="-parameters" />
       <module name="config-server" options="-parameters" />
       <module name="inventory-service" options="-parameters" />
       <module name="order-service" options="-parameters" />

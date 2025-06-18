@@ -147,5 +147,22 @@ public class Product {
     public void setReviews(List<Review> reviews) {
         this.reviews = reviews;
     }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", brand='" + brand + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", MimeType='" + MimeType + '\'' +
+                ", extension='" + extension + '\'' +
+                ", reviews=" + reviews +
+                ", isActive=" + isActive +
+                ", productCategory=" + productCategory +
+                '}';
+    }
 }
 

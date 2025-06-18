@@ -2,7 +2,8 @@ package shopmate.productservice.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,6 +29,37 @@ public class ProductService {
     private static final String IMAGE_BASE_PATH = "/home/noorzai/uploads/images/";
     @Autowired
     ProductRepository productRepository;
+
+    public Product saveProduct(Product product){
+        return productRepository.save(product);
+    }
+
+    public Page<Product> getAllProducts(Pageable pageable) {
+        return productRepository.findAllByIsActiveTrue(pageable);
+    }
+
+    public Optional<Product> getProductById(Integer id) {
+        return productRepository.findById(id);
+    }
+    public Product updateProduct(Integer id, Product updatedProduct) {
+        return productRepository.findById(id).map(product -> {
+            product.setName(updatedProduct.getName());
+            product.setDescription(updatedProduct.getDescription());
+            product.setPrice(updatedProduct.getPrice());
+            product.setBrand(updatedProduct.getBrand());
+            product.setImageUrl(updatedProduct.getImageUrl());
+            product.setMimeType(updatedProduct.getMimeType());
+            product.setExtension(updatedProduct.getExtension());
+            product.setIsActive(updatedProduct.getIsActive());
+            product.setProductCategory(updatedProduct.getProductCategory());
+            return productRepository.save(product);
+        }).orElseThrow(() -> new RuntimeException("Product not found"));
+    }
+
+    public void deleteProduct(Integer id) {
+        productRepository.deleteById(id);
+    }
+
     public Product save(ProductRequest productRequest, MultipartFile image) throws IOException {
         Product product = new Product();
         String imageUrl = saveImage(image,product);
@@ -37,7 +69,6 @@ public class ProductService {
         product.setImageUrl(imageUrl);
         product.setIsActive(productRequest.getIsActive());
         product.setBrand(productRequest.getBrand());
-
         return productRepository.save(product);
     }
 
@@ -68,9 +99,7 @@ public class ProductService {
 
     public ResponseEntity<FileSystemResource> getFile(String fileName) {
         Product product = productRepository.findByImageUrl(fileName);
-        if(product == null) {
-            throw new ResourceNotFoundException("File not found");
-        }
+
         File file = new File(IMAGE_BASE_PATH + fileName);
 
         if (!file.exists()) {
@@ -121,10 +150,6 @@ public class ProductService {
 
     public Optional<Product> findById(Integer id){
         return productRepository.findById(id);
-    }
-
-    public List<Product> findAll(){
-        return productRepository.findAll();
     }
 
 }

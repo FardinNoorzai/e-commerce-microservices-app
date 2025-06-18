@@ -1,5 +1,6 @@
 package shopmate.productservice.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -17,6 +18,7 @@ public class ProductCategory {
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     private String description;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "productCategory")
     List<Product> products;
 

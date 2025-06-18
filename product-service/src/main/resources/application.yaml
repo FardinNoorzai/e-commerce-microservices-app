@@ -4,7 +4,8 @@ spring:
   data:
     rest:
       base-path: /api
-
+  hateoas:
+    use-hal-as-default-json-media-type: false
   jpa:
     hibernate:
       ddl-auto: update

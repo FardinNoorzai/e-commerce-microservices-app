@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,10 +20,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
     JwtUtil jwtUtil;
+    Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
 
         String token = request.getHeader("Authorization");
 
@@ -29,7 +33,6 @@ public class JwtFilter extends OncePerRequestFilter {
             token = token.substring(7);
             try {
                 String username = jwtUtil.extractUsername(token);
-                System.out.println(username);
                 request.setAttribute("username", username);
                 if (username != null && jwtUtil.validateToken(token)) {
                     UsernamePasswordAuthenticationToken authentication =

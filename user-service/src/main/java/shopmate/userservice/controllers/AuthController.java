@@ -37,7 +37,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<Map<String,String>> login(@RequestBody AuthRequest request) {
         System.out.println(request.password());
         System.out.println(request.username());
         Authentication authentication = authenticationManager.authenticate(
@@ -45,11 +45,12 @@ public class AuthController {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetails user = (UserDetails) authentication.getPrincipal();
-        return ResponseEntity.ok(jwtUtil.generateToken(user));
+        return ResponseEntity.ok(Map.of("token", jwtUtil.generateToken(user)));
     }
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody AuthRequest request) {
+        System.out.println(request);
         if (userRepository.findByUsername(request.username()).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
         }

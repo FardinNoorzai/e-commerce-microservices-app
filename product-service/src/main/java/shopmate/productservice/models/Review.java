@@ -1,5 +1,6 @@
 package shopmate.productservice.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,9 +15,19 @@ public class Review {
     @Size(max = 100, message = "Product name cannot exceed 100 characters")
     String text;
     String username;
+    Integer rating;
 
+    @JsonIgnore
     @ManyToOne
     Product product;
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
 
     public Integer getId() {
         return id;
