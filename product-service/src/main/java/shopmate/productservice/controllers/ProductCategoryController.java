@@ -3,10 +3,13 @@ package shopmate.productservice.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import shopmate.productservice.dto.CategoryResponse;
 import shopmate.productservice.models.ProductCategory;
 import shopmate.productservice.services.ProductCategoryService;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products/categories")
@@ -21,10 +24,18 @@ public class ProductCategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductCategory> getCategory(@PathVariable Integer id) {
-        return categoryService.getCategoryById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Map<String,CategoryResponse>> getCategory(@PathVariable Integer id) {
+        Optional<ProductCategory> category = categoryService.getCategoryById(id);
+        if(category.isPresent()) {
+            ProductCategory productCategory = category.get();
+            CategoryResponse categoryResponse = new CategoryResponse();
+            categoryResponse.setId(productCategory.getId());
+            categoryResponse.setName(productCategory.getName());
+            categoryResponse.setDescription(productCategory.getDescription());
+            categoryResponse.setProducts(productCategory.getProducts());
+            return ResponseEntity.ok(Map.of("category", categoryResponse));
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping
