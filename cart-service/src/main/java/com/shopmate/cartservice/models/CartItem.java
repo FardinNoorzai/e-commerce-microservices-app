@@ -22,6 +22,17 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
+    @JsonIgnore
+    @ManyToOne
+    Checkout checkout;
+
+    public Checkout getCheckout() {
+        return checkout;
+    }
+
+    public void setCheckout(Checkout checkout) {
+        this.checkout = checkout;
+    }
 
     public Long getId() {
         return id;

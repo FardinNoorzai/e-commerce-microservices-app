@@ -2,11 +2,15 @@ package com.shopmate.cartservice.controllers;
 
 import com.shopmate.cartservice.dtos.CartItemRequest;
 import com.shopmate.cartservice.dtos.CartResponse;
+import com.shopmate.cartservice.dtos.CheckoutResponse;
 import com.shopmate.cartservice.models.Cart;
 import com.shopmate.cartservice.models.CartItem;
 import com.shopmate.cartservice.models.CartItemStatus;
+import com.shopmate.cartservice.models.Checkout;
+import com.shopmate.cartservice.repositories.CheckoutRepository;
 import com.shopmate.cartservice.services.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,8 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
+    @Autowired
+    CheckoutRepository checkoutRepository;
 
     @PostMapping
     public ResponseEntity<Map<String, List<CartItem>>> addItemToCart(
@@ -50,5 +56,9 @@ public class CartController {
     public ResponseEntity<Map<String,String>> clearCart(Authentication authentication) {
         cartService.clearCart(authentication.getName());
         return ResponseEntity.ok(Map.of("message","Cart cleared."));
+    }
+    @PostMapping("/checkout")
+    public ResponseEntity<CheckoutResponse> checkout(Authentication authentication) {
+        return ResponseEntity.ok(cartService.checkout(authentication.getName()));
     }
 }
