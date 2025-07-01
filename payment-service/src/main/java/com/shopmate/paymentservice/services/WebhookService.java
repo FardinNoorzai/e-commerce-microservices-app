@@ -1,6 +1,6 @@
 package com.shopmate.paymentservice.services;
 
-import com.shopmate.dtos.CompletedPaymentDto;
+import com.shopmate.events.CompletedPaymentDto;
 import com.shopmate.paymentservice.message.publishers.NewPaymentPublisher;
 import com.shopmate.paymentservice.models.Payment;
 import com.shopmate.paymentservice.repositories.PaymentRepository;

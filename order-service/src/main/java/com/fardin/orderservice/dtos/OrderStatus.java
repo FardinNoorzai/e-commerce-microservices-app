@@ -1,19 +1,20 @@
 package com.fardin.orderservice.dtos;
 
+import com.shopmate.events.OrderEvent;
 import lombok.*;
 
 public class OrderStatus {
+    String checkoutId;
     String orderId;
-    String status;
     String paymentUrl;
+    String orderStatus;
 
-    public OrderStatus(String orderId, String status, String paymentUrl) {
-        this.orderId = orderId;
-        this.status = status;
-        this.paymentUrl = paymentUrl;
+    public String getCheckoutId() {
+        return checkoutId;
     }
-    public OrderStatus() {
 
+    public void setCheckoutId(String checkoutId) {
+        this.checkoutId = checkoutId;
     }
 
     public String getOrderId() {
@@ -24,14 +25,6 @@ public class OrderStatus {
         this.orderId = orderId;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getPaymentUrl() {
         return paymentUrl;
     }
@@ -40,12 +33,21 @@ public class OrderStatus {
         this.paymentUrl = paymentUrl;
     }
 
+    public String getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(String orderStatus) {
+        this.orderStatus = orderStatus;
+    }
+
     @Override
     public String toString() {
         return "OrderStatus{" +
-                "orderId='" + orderId + '\'' +
-                ", status='" + status + '\'' +
+                "checkoutId='" + checkoutId + '\'' +
+                ", orderId='" + orderId + '\'' +
                 ", paymentUrl='" + paymentUrl + '\'' +
+                ", orderStatus=" + orderStatus +
                 '}';
     }
 }

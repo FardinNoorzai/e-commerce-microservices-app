@@ -1,70 +1,92 @@
 package com.fardin.inventroyservice.services;
 
+import com.fardin.inventroyservice.models.Item;
 import com.fardin.inventroyservice.models.Transaction;
+import com.fardin.inventroyservice.repository.ItemRepository;
 import com.fardin.inventroyservice.repository.ProductEntryRepository;
 import com.fardin.inventroyservice.repository.TransactionRepository;
-import com.shopmate.dtos.InventoryResponseToNewOrderDto;
-import com.shopmate.dtos.OrderDto;
-import com.shopmate.dtos.PaymentSuccessDto;
+import com.shopmate.events.CartItem;
+import com.shopmate.events.CheckoutEvent;
+import com.shopmate.events.InventoryValidationEvent;
+import com.shopmate.events.PaymentSuccessDto;
 import com.shopmate.states.InventoryStates;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class InventoryService {
     @Autowired
     TransactionRepository transactionRepository;
     @Autowired
+    ItemRepository itemRepository;
+    @Autowired
     ProductEntryRepository productEntryRepository;
-    public InventoryResponseToNewOrderDto calculateInventory(OrderDto orderDto) {
-        BigInteger entries = productEntryRepository.calculateInventoryByProductId(orderDto.getProductId()).orElse(BigInteger.ZERO);
-        BigInteger transactions = transactionRepository.calculateInventoryByProductIdAndNotRejected(orderDto.getProductId()).orElse(BigInteger.ZERO);
-        BigInteger total = entries.subtract(transactions);
-        System.out.println("entries: " + entries);
-        System.out.println("transactions: " + transactions);
-        System.out.println("total: " + total);
-        if(total.compareTo(orderDto.getQuantity()) >= 0){
-            Transaction transaction = new Transaction();
-            transaction.setProductId(orderDto.getProductId());
-            transaction.setQuantity(orderDto.getQuantity());
-            transaction.setState(InventoryStates.HOLD);
-            transaction.setOrderId(orderDto.getOrderId());
-            transaction.setTimestamp(LocalDateTime.now());
-            transaction.setUsername(orderDto.getUserName());
-            transaction = transactionRepository.save(transaction);
-            InventoryResponseToNewOrderDto response = InventoryResponseToNewOrderDto.builder()
-                    .inventoryId(transaction.getId())
-                    .inventoryState(transaction.getState())
-                    .orderId(transaction.getOrderId())
-                    .productId(transaction.getProductId())
-                    .quantity(transaction.getQuantity())
-                    .userName(transaction.getUsername())
-                    .price(orderDto.getPrice())
-                    .totalPrice(orderDto.getTotalPrice())
-                    .build();
-            return response;
+
+    @Transactional
+    public InventoryValidationEvent calculateInventory(CheckoutEvent event) {
+        boolean isValid = true;
+        Transaction transaction = new Transaction();
+        for (CartItem cartItem : event.getCartItems()) {
+            BigDecimal transactionTotal = BigDecimal.ZERO;
+
+            List<Item> savedItems = itemRepository.findByProductId(cartItem.getProductId().intValue());
+            BigDecimal entryTotal = productEntryRepository
+                    .calculateInventoryByProductId(cartItem.getProductId().intValue())
+                    .orElse(BigDecimal.ZERO);
+
+            for (Item savedItem : savedItems) {
+                if (!InventoryStates.REJECTED.equals(savedItem.getTransaction().getState())) {
+                    transactionTotal = transactionTotal.add(savedItem.getQuantity());
+                }
+            }
+
+            BigDecimal currentRequestedQty = new BigDecimal(cartItem.getQuantity());
+            if (transactionTotal.add(currentRequestedQty).compareTo(entryTotal) > 0) {
+                isValid = false;
+                System.out.println("now enough inventory quiting...");
+                break;
+            }
         }
-        return InventoryResponseToNewOrderDto.builder()
-                .inventoryState(InventoryStates.REJECTED)
-                .orderId(orderDto.getOrderId())
-                .productId(orderDto.getProductId())
-                .quantity(orderDto.getQuantity())
-                .userName(orderDto.getUserName())
-                .price(orderDto.getPrice())
-                .totalPrice(orderDto.getTotalPrice())
-                .build();
+
+        transaction.setUsername(event.getUsername());
+        transaction.setCheckoutId(event.getId());
+        transaction.setTimestamp(LocalDateTime.now());
+        transaction.setState(isValid ? InventoryStates.HOLD : InventoryStates.REJECTED);
+
+        List<Item> items = new ArrayList<>();
+        for (CartItem cartItem : event.getCartItems()) {
+            Item item = new Item();
+            item.setProductId(cartItem.getProductId().intValue());
+            item.setQuantity(BigDecimal.valueOf(cartItem.getQuantity()));
+            item.setTransaction(transaction);
+            items.add(item);
+        }
+
+        transaction.setItems(items);
+        transactionRepository.save(transaction);
+
+
+        InventoryValidationEvent e = new InventoryValidationEvent();
+        e.setValid(isValid);
+        e.setCheckoutId(event.getId());
+        e.setInventoryId(transaction.getId());
+
+        return e;
     }
 
+
     public void updateOrderStatus(PaymentSuccessDto message) {
-        Transaction t = transactionRepository.findByOrderId(message.getOrderId()).orElse(null);
-        if(t == null){
-            return;
+        List<Transaction> transactions = Collections.singletonList(transactionRepository.findByCheckoutId(message.getOrderId()).orElse(null));
+        for (Transaction t : transactions) {
+            t.setState(InventoryStates.COMPLETED);
         }
-        t.setState(InventoryStates.COMPLETED);
-        transactionRepository.save(t);
+        transactionRepository.saveAll(transactions);
     }
 }

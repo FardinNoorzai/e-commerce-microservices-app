@@ -1,7 +1,7 @@
 package com.fardin.inventroyservice.message.listeners;
 
 import com.fardin.inventroyservice.services.InventoryService;
-import com.shopmate.dtos.PaymentSuccessDto;
+import com.shopmate.events.PaymentSuccessDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;

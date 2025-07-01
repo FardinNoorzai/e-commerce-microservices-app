@@ -16,6 +16,6 @@ import java.util.Optional;
 public interface ProductEntryRepository extends JpaRepository<ProductEntry, String> {
 
     @Query("SELECT sum(p.quantity) FROM ProductEntry p WHERE p.productId = :productId")
-    public Optional<BigInteger> calculateInventoryByProductId(@Param("productId") Integer productId);
+    public Optional<BigDecimal> calculateInventoryByProductId(@Param("productId") Integer productId);
 
 }

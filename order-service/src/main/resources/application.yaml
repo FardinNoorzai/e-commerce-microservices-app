@@ -1,7 +1,8 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
+    show-sql: true
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     username: fardin
@@ -10,6 +11,9 @@ spring:
   data:
     rest:
       base-path: api
+    redis:
+      host: localhost
+      port: 6379
   kafka:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer

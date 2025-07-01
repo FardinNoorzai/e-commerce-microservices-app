@@ -6,6 +6,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Transaction {
@@ -14,13 +15,13 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     String username;
-    String orderId;
-    BigInteger quantity;
-    Integer productId;
+    String checkoutId;
     @Enumerated(EnumType.STRING)
     InventoryStates state;
     LocalDateTime timestamp;
 
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "transaction")
+    List<Item> items;
     public String getId() {
         return id;
     }
@@ -37,28 +38,12 @@ public class Transaction {
         this.username = username;
     }
 
-    public String getOrderId() {
-        return orderId;
+    public String getCheckoutId() {
+        return checkoutId;
     }
 
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
-    }
-
-    public BigInteger getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(BigInteger quantity) {
-        this.quantity = quantity;
-    }
-
-    public Integer getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Integer productId) {
-        this.productId = productId;
+    public void setCheckoutId(String checkoutId) {
+        this.checkoutId = checkoutId;
     }
 
     public InventoryStates getState() {
@@ -75,5 +60,25 @@ public class Transaction {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "id='" + id + '\'' +
+                ", username='" + username + '\'' +
+                ", checkoutId='" + checkoutId + '\'' +
+                ", state=" + state +
+                ", timestamp=" + timestamp +
+                ", items=" + items +
+                '}';
     }
 }

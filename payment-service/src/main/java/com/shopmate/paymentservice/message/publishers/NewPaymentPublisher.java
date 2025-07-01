@@ -1,7 +1,6 @@
 package com.shopmate.paymentservice.message.publishers;
 
-import com.shopmate.dtos.CompletedPaymentDto;
-import com.shopmate.dtos.OrderDto;
+import com.shopmate.events.CompletedPaymentDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;

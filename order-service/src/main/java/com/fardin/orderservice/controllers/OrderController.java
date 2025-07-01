@@ -15,9 +15,13 @@ import java.util.Map;
 public class OrderController {
     @Autowired
     private OrderService orderService;
-    @GetMapping("{orderId}/status")
-    public OrderStatus getOrderStatus(@PathVariable("orderId") String orderId) {
-        return orderService.getOrderStatus(orderId);
+    @GetMapping("/status/{checkoutId}")
+    public ResponseEntity<Map<String,OrderStatus>> getOrderStatus(@PathVariable("checkoutId") String orderId) {
+        OrderStatus orderStatus = orderService.getOrderStatus(orderId);
+        if(orderStatus == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(Map.of("order",orderStatus));
     }
     @PostMapping
     public ResponseEntity<Map<String,Order>> createOrder(@RequestBody Order order) {

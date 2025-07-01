@@ -10,13 +10,12 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 @RepositoryRestResource(path = "transactions", collectionResourceRel = "transactions")
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
-
-    @Query("SELECT SUM(t.quantity) FROM Transaction t WHERE t.productId = :productId AND t.state != 'REJECTED'")
-    Optional<BigInteger> calculateInventoryByProductIdAndNotRejected(@Param("productId") Integer productId);
-    public Optional<Transaction> findByOrderId(String orderId);
+    public Optional<Transaction> findByCheckoutId(String checkoutId);
+    List<Transaction> findAllByCheckoutId(String checkoutId);
 }
