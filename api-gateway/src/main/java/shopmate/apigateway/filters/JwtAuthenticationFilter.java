@@ -3,13 +3,13 @@ package shopmate.apigateway.filters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.server.WebFilter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
@@ -17,9 +17,9 @@ import reactor.core.publisher.Mono;
 @Component
 public class JwtAuthenticationFilter implements WebFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     @Autowired
     JwtUtil jwtUtil;
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -27,9 +27,11 @@ public class JwtAuthenticationFilter implements WebFilter {
         logger.info("Incoming request: {}", request.getURI().getPath());
 
         if (request.getURI().getPath().contains("/api/users/auth/login") ||
-                request.getURI().getPath().contains("/api/users/auth/register")||
+                request.getURI().getPath().contains("/api/users/auth/register") ||
                 request.getURI().getPath().contains("/api/users/auth/validate") ||
-                request.getURI().getPath().contains("/api/products/images/")) {
+                request.getURI().getPath().contains("/api/products/images/") ||
+                request.getURI().getPath().contains("/api/products/categories") ||
+                request.getURI().getPath().contains("/api/products")) {
             logger.info("Skipping authentication for: {}", request.getURI().getPath());
             return chain.filter(exchange);
         }
