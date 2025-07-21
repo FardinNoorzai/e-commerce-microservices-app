@@ -1,27 +1,30 @@
-package shopmate.productservice.kafka;
+package shopmate.productservice.services;
 
 import com.shopmate.events.CartItem;
 import com.shopmate.events.CheckoutEvent;
 import com.shopmate.events.ProductValidationEvent;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import shopmate.productservice.models.Product;
-import shopmate.productservice.services.ProductService;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
-public class CheckoutListener {
+@Profile("rabbitmq")
+public class RabbitCheckoutListener {
 
     @Autowired
     ProductService productService;
 
     @Autowired
-    KafkaPublisher kafkaPublisher;
-    @KafkaListener(topics = "checkout",groupId = "product-service-group")
+    RabbitProductValidationPublisher rabbitPublisher;
+
+    @RabbitListener(queues = "checkout.queue.productservice")
     public void onCheckout(CheckoutEvent checkoutEvent) {
+        System.out.println("Received checkout event: " + checkoutEvent);
         for (CartItem cartItem : checkoutEvent.getCartItems()) {
             Optional<Product> optionalProduct = productService.findById(cartItem.getProductId().intValue());
 
@@ -45,6 +48,7 @@ public class CheckoutListener {
         event.setProductId(productId);
         event.setCheckoutId(checkoutId);
         event.setValid(isValid);
-        kafkaPublisher.publish(event);
+        rabbitPublisher.publish(event);
     }
 }
+

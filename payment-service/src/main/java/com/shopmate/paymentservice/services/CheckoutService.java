@@ -77,6 +77,7 @@ public class CheckoutService {
             Payment payment = new Payment();
             payment.setPaymentId(session.getId());
             payment.setOrderId(request.getCheckoutId());
+            payment.setCheckoutId(request.getCheckoutId());
 
             paymentRepository.save(payment);
 

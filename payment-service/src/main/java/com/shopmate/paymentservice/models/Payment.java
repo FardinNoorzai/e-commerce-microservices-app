@@ -13,6 +13,7 @@ public class Payment {
     String id;
     String orderId;
     String paymentId;
+    String checkoutId;
 
     public Payment(String id, String orderId, String paymentId) {
         this.id = id;
@@ -21,6 +22,14 @@ public class Payment {
     }
     public Payment() {
 
+    }
+
+    public String getCheckoutId() {
+        return checkoutId;
+    }
+
+    public void setCheckoutId(String checkoutId) {
+        this.checkoutId = checkoutId;
     }
 
     public String getId() {

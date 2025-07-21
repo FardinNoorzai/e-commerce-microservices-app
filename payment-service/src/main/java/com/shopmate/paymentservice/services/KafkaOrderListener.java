@@ -1,15 +1,16 @@
-package com.shopmate.paymentservice.message.listeners;
+package com.shopmate.paymentservice.services;
 
 import com.shopmate.events.OrderEvent;
 import com.shopmate.events.PaymentEvent;
-import com.shopmate.paymentservice.services.CheckoutService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class OrderListener {
+@Profile("kafka")
+public class KafkaOrderListener {
     @Autowired
     CheckoutService checkoutService;
 

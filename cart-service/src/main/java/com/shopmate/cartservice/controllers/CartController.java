@@ -61,4 +61,9 @@ public class CartController {
     public ResponseEntity<CheckoutResponse> checkout(Authentication authentication) {
         return ResponseEntity.ok(cartService.checkout(authentication.getName()));
     }
+
+    @GetMapping("/checkouts")
+    public ResponseEntity<Map<String,List<Checkout>>> getCheckouts(Authentication authentication) {
+        return ResponseEntity.ok(Map.of("checkouts", cartService.getCheckouts(authentication.getName())));
+    }
 }

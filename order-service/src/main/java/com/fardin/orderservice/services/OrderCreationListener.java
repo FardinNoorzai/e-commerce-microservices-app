@@ -1,7 +1,6 @@
 package com.fardin.orderservice.services;
 
 import com.fardin.orderservice.events.OrderCreatedEvent;
-import com.fardin.orderservice.message.publishers.OrderPublisher;
 import com.fardin.orderservice.models.OrderItem;
 import com.fardin.orderservice.states.OrderStatus;
 import com.shopmate.events.CartItem;
@@ -41,6 +40,6 @@ public class OrderCreationListener {
         } else if (orderCreatedEvent.getOrder().getStatus().equals(OrderStatus.FAILED)) {
             orderEvent.setStatus(OrderEvent.OrderStatus.FAILED);
         }
-        orderPublisher.publishNewOrder("orders", orderEvent);
+        orderPublisher.publish(orderEvent);
     }
 }

@@ -1,29 +1,32 @@
 package com.shopmate.paymentservice.services;
 
-import com.shopmate.events.CompletedPaymentDto;
-import com.shopmate.paymentservice.message.publishers.NewPaymentPublisher;
+import com.shopmate.events.PaymentCompletedEvent;
 import com.shopmate.paymentservice.models.Payment;
 import com.shopmate.paymentservice.repositories.PaymentRepository;
-import com.stripe.model.*;
+import com.stripe.model.Event;
+import com.stripe.model.HasId;
+import com.stripe.model.StripeObject;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
 @Service
 public class WebhookService {
 
-    @Value("${stripe.webhook-secret}")
-    private String webhookSecret;
     @Autowired
     PaymentRepository paymentRepository;
     @Autowired
-    NewPaymentPublisher paymentPublisher;
+    PaymentPublisher paymentPublisher;
+    @Value("${stripe.webhook-secret}")
+    private String webhookSecret;
 
     public ResponseEntity<String> handleWebhook(String payload, String sigHeader) {
+        System.out.println("webhook event received");
         Event event;
         try {
             event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
@@ -34,6 +37,7 @@ public class WebhookService {
 
         switch (event.getType()) {
             case "checkout.session.completed":
+                System.out.println("handling completed payment");
                 handleCheckoutSessionCompleted(event);
                 break;
             case "payment_intent.canceled":
@@ -84,59 +88,33 @@ public class WebhookService {
         System.out.println("Session retrieved successfully: " + session.getId());
         System.out.println("Payment status: " + session.getPaymentStatus());
 
-        String customerId = session.getCustomer();
-        if (customerId != null) {
-            try {
-                Customer customer = Customer.retrieve(customerId);
-                System.out.println("Customer Email: " + customer.getEmail());
-                System.out.println("Customer Name: " + customer.getName());
-            } catch (Exception e) {
-                System.err.println("Failed to retrieve customer: " + e.getMessage());
-            }
-        }
+        String email = session.getMetadata() != null ? session.getMetadata().get("email") : null;
+        String name = session.getMetadata() != null ? session.getMetadata().get("name") : null;
 
-        String paymentStatus = session.getPaymentStatus();
-        switch (paymentStatus) {
-            case "paid":
-                handlePaymentSucceeded(session);
-                break;
-            case "unpaid":
-                handlePaymentFailed(session);
-                break;
-            case "canceled":
-                handlePaymentCanceled(session);
-                break;
-            default:
-                System.out.println("Unhandled payment status: " + paymentStatus);
-        }
-    }
-
-    private void handlePaymentSucceeded(Session session) {
-        System.out.println("Handling payment succeeded for session: " + session.getId());
         Payment payment = findByPaymentId(session.getId());
         if (payment == null) {
             System.err.println("No payment found for session: " + session.getId());
             return;
         }
-        CompletedPaymentDto completedPaymentDto = new CompletedPaymentDto();
-        completedPaymentDto.setPaymentId(session.getId());
-        completedPaymentDto.setOrderId(payment.getOrderId());
-        completedPaymentDto.setEmail(session.getMetadata().get("email"));
-        completedPaymentDto.setCustomerName(session.getMetadata().get("name"));
-        completedPaymentDto.setStatus("PAID");
-        paymentPublisher.publishNewPayment("completed-payments", completedPaymentDto);
+
+        PaymentCompletedEvent dto = new PaymentCompletedEvent();
+        dto.setPaymentId(session.getId());
+        dto.setCheckoutId(payment.getCheckoutId());
+        dto.setEmail(email);
+        dto.setCustomerName(name);
+
+        if ("paid".equalsIgnoreCase(session.getPaymentStatus())) {
+            dto.setStatus("PAID");
+            System.out.println("Payment succeeded and event published.");
+        } else {
+            dto.setStatus("FAILED");
+            System.out.println("Payment failed and failure event published.");
+        }
+        paymentPublisher.publish(dto);
     }
 
-    private void handlePaymentFailed(Session session) {
-        System.out.println("Handling payment failed for session: " + session.getId());
-    }
 
-    private void handlePaymentCanceled(Session session) {
-        System.out.println("Handling payment canceled for session: " + session.getId());
-    }
-
-
-    public Payment findByPaymentId(String id){
+    public Payment findByPaymentId(String id) {
         return paymentRepository.findByPaymentId(id);
     }
 }

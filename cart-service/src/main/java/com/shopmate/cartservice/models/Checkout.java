@@ -17,7 +17,8 @@ public class Checkout {
 
     @OneToMany(mappedBy = "checkout", cascade = CascadeType.ALL)
     private List<CartItem> items;
-
+    @Enumerated(EnumType.STRING)
+    CheckoutStatus status;
     public Checkout() {
         this.createdAt = LocalDateTime.now();
     }
@@ -52,6 +53,14 @@ public class Checkout {
 
     public void setItems(List<CartItem> items) {
         this.items = items;
+    }
+
+    public CheckoutStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CheckoutStatus status) {
+        this.status = status;
     }
 
     @Override

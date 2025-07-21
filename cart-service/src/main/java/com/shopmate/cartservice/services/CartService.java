@@ -2,12 +2,9 @@ package com.shopmate.cartservice.services;
 
 import com.shopmate.cartservice.dtos.CheckoutResponse;
 import com.shopmate.cartservice.exceptions.CartEmptyException;
-import com.shopmate.cartservice.models.Cart;
-import com.shopmate.cartservice.models.CartItem;
+import com.shopmate.cartservice.models.*;
 import com.shopmate.cartservice.dtos.CartItemRequest;
 import com.shopmate.cartservice.dtos.CartResponse;
-import com.shopmate.cartservice.models.CartItemStatus;
-import com.shopmate.cartservice.models.Checkout;
 import com.shopmate.cartservice.repositories.CartItemRepository;
 import com.shopmate.cartservice.repositories.CartRepository;
 import com.shopmate.cartservice.repositories.CheckoutRepository;
@@ -16,7 +13,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,8 +25,9 @@ public class CartService {
     private CartItemRepository cartItemRepository;
     @Autowired
     private CheckoutRepository checkoutRepository;
+
     @Autowired
-    private KafkaPublisher kafkaPublisher;
+    CheckoutPublisher checkoutPublisher;
 
     public Cart getOrCreateCart(String userId) {
         return cartRepository.findByUserId(userId)
@@ -128,7 +125,7 @@ public class CartService {
         checkout.setItems(activeItems);
 
         activeItems.forEach(item -> item.setCheckout(checkout));
-
+        checkout.setStatus(CheckoutStatus.PENDING);
         Checkout savedCheckout = checkoutRepository.save(checkout);
 
         List<com.shopmate.events.CartItem> kafkaItems = activeItems.stream()
@@ -145,12 +142,16 @@ public class CartService {
         checkoutDto.setUsername(savedCheckout.getUserId());
         checkoutDto.setCartItems(kafkaItems);
         System.out.println("Publishing to kafka topic");
-        kafkaPublisher.publishCheckout("checkout", checkoutDto);
+        checkoutPublisher.publish(checkoutDto);
         CheckoutResponse response = new CheckoutResponse();
         response.setUrl("/api/orders/" + savedCheckout.getId());
         response.setCheckout(savedCheckout);
 
         return response;
+    }
+
+    public List<Checkout> getCheckouts(String userId) {
+        return checkoutRepository.findAllByUserId(userId);
     }
 
 

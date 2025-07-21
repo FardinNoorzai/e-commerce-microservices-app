@@ -1,0 +1,20 @@
+spring:
+  config:
+    import: optional:configserver:http://localhost:8888
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        concurrency: 1        # how many concurrent consumers
+        max-concurrency: 5    # max number of concurrent consumers
+        retry:
+          enabled: true       # Enable retry logic
+          max-attempts: 3
+          initial-interval: 1000
+    template:
+      exchange: user-validation.exchange
+      routing-key: user-validation

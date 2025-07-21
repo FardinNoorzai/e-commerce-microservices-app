@@ -1,14 +1,14 @@
-package com.fardin.orderservice.message.listeners;
+package com.fardin.orderservice.services;
 
-import com.fardin.orderservice.services.OrderService;
-import com.shopmate.events.OrderEvent;
 import com.shopmate.events.PaymentEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PaymentListener {
+@Profile("kafka")
+public class KafkaPaymentListener {
     @Autowired
     private OrderService orderService;
 

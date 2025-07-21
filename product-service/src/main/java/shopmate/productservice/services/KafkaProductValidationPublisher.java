@@ -1,12 +1,14 @@
-package shopmate.productservice.kafka;
+package shopmate.productservice.services;
 
 import com.shopmate.events.ProductValidationEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class KafkaPublisher {
+@Profile("kafka")
+public class KafkaProductValidationPublisher {
 
     @Autowired
     KafkaTemplate<String, ProductValidationEvent> kafkaTemplate;

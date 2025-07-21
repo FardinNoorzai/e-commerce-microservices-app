@@ -1,24 +1,24 @@
-package shopmate.userservice.kafka;
+package shopmate.userservice.services;
 
 import com.shopmate.events.CheckoutEvent;
 import com.shopmate.events.UserValidationEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.context.annotation.Profile;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import shopmate.userservice.models.User;
-import shopmate.userservice.services.CustomUserDetailsService;
 
 @Service
-public class CheckoutListener {
+@Profile("kafka")
+public class KafkaPublisher implements UserValidationPublisher {
 
     @Autowired
-    CustomUserDetailsService  customUserDetailsService;
-
+    CustomUserDetailsService customUserDetailsService;
     @Autowired
-    KafkaPublisher  kafkaPublisher;
+    KafkaTemplate<String, UserValidationEvent> kafkaTemplate;
 
-    @KafkaListener(topics = "checkout",groupId = "user-service-group")
-    public void listen(CheckoutEvent dto) {
+    @Override
+    public void publish(CheckoutEvent dto) {
         User user = customUserDetailsService.findByUsername(dto.getUsername());
         UserValidationEvent userValidationEvent = new UserValidationEvent();
         if(user != null){
@@ -32,6 +32,10 @@ public class CheckoutListener {
             userValidationEvent.setUsername(dto.getUsername());
             userValidationEvent.setValid(false);
         }
-        kafkaPublisher.sendUserValidationEvent("user-validation", userValidationEvent);
+        sendUserValidationEvent("user-validation", userValidationEvent);
+    }
+
+    public void sendUserValidationEvent(String topic,UserValidationEvent userValidationEvent) {
+        kafkaTemplate.send(topic, userValidationEvent);
     }
 }
