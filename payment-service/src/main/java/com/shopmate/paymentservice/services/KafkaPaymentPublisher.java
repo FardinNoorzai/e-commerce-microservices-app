@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @Profile("kafka")
 public class KafkaPaymentPublisher implements PaymentPublisher{
@@ -15,6 +17,7 @@ public class KafkaPaymentPublisher implements PaymentPublisher{
     KafkaTemplate<String, PaymentCompletedEvent> kafkaTemplate;
     @Override
     public void publish(PaymentCompletedEvent event) {
+        event.setTimestamp(Instant.now().toEpochMilli());
         kafkaTemplate.send("completed-payments", event);
 
     }

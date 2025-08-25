@@ -83,7 +83,6 @@ public class KafkaOrderEventAggregator {
 
             if (Boolean.TRUE.equals(locked)) {
                 try {
-                    // Re-fetch events after acquiring lock to handle expiry/processing
                     events = redisTemplate.opsForHash().entries(key);
                     if (events != null &&
                             events.containsKey("checkout") &&
@@ -91,7 +90,6 @@ public class KafkaOrderEventAggregator {
                             events.containsKey("product") &&
                             events.containsKey("inventory")) {
 
-                        // Delete events BEFORE processing to prevent duplicates
                         redisTemplate.delete(key);
 
                         CheckoutEvent checkout = (CheckoutEvent) events.get("checkout");
@@ -102,7 +100,6 @@ public class KafkaOrderEventAggregator {
                         orderService.createOrder(checkout, user, product,inventory);
                     }
                 } finally {
-                    // Always release the lock
                     redisTemplate.delete(lockKey);
                 }
             }

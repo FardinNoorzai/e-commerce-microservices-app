@@ -22,6 +22,7 @@ public class SecurityConfigs {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorizationManagerRequestMatcherRegistry ->{
                     authorizationManagerRequestMatcherRegistry.requestMatchers("/api/products/images/**").permitAll()
+                            .requestMatchers("/actuator/**").permitAll()
                             .requestMatchers("/api/products/**").permitAll()
 
                 .anyRequest().authenticated();

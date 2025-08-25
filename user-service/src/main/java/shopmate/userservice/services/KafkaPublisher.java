@@ -8,6 +8,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import shopmate.userservice.models.User;
 
+import java.time.Instant;
+
 @Service
 @Profile("kafka")
 public class KafkaPublisher implements UserValidationPublisher {
@@ -36,6 +38,7 @@ public class KafkaPublisher implements UserValidationPublisher {
     }
 
     public void sendUserValidationEvent(String topic,UserValidationEvent userValidationEvent) {
+        userValidationEvent.setTimestamp(Instant.now().toEpochMilli());
         kafkaTemplate.send(topic, userValidationEvent);
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @Profile("rabbitmq")
 public class RabbitProductValidationPublisher {
@@ -18,6 +20,7 @@ public class RabbitProductValidationPublisher {
     private RabbitTemplate rabbitTemplate;
 
     public void publish(ProductValidationEvent productValidationEvent) {
+        productValidationEvent.setTimestamp(Instant.now().toEpochMilli());
         rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, productValidationEvent);
         System.out.println("✅ Published ProductValidationEvent to RabbitMQ");
     }

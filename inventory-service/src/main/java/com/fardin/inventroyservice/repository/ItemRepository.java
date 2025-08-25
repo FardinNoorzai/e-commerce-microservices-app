@@ -9,5 +9,8 @@ import java.util.List;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, String> {
 
-    public List<Item> findByProductId(Integer productId);
+    List<Item> findByProductId(Integer productId);
+
+    // Add this for batch fetch by product IDs
+    List<Item> findByProductIdIn(List<Integer> productIds);
 }

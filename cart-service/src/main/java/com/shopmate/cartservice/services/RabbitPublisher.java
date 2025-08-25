@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @Profile("rabbitmq")
 public class RabbitPublisher implements CheckoutPublisher {
@@ -19,6 +21,7 @@ public class RabbitPublisher implements CheckoutPublisher {
     @Override
     public void publish(CheckoutEvent checkoutEvent) {
         try {
+            checkoutEvent.setTimestamp(Instant.now().toEpochMilli());
             rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY, checkoutEvent);
             System.out.println("✅ Sent to RabbitMQ: Exchange = " + EXCHANGE_NAME + ", Routing Key = " + ROUTING_KEY);
         } catch (Exception e) {

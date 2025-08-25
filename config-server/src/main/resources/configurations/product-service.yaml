@@ -1,13 +1,30 @@
 server:
   port: 8020
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    enabled: true
+  otlp:
+    tracing:
+      endpoint: http://otel-collector:4318
+    metrics:
+      endpoint: http://otel-collector:4318
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 eureka:
   client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
-
-
+    service-url:
+      defaultZone: http://service-discovery:8761/eureka
 
 
 jwt:

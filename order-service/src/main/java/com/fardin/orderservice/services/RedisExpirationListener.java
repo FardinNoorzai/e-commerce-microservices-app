@@ -23,11 +23,13 @@ public class RedisExpirationListener extends KeyExpirationEventMessageListener {
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
+        System.out.println("Entering redis event handling");
         String expiredKey = message.toString();
         if (expiredKey.startsWith("order:events:")) {
             String checkoutId = expiredKey.replace("order:events:", "");
             Order order = orderService.findByCheckoutId(checkoutId);
             if (order == null) {
+                System.out.println("an order failed");
                 orderService.createFailedOrder(checkoutId);
             }
         }

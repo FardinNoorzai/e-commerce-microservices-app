@@ -1,0 +1,31 @@
+spring:
+  config:
+    import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:8888}
+
+  data:
+    rest:
+      base-path: ${SPRING_DATA_REST_BASE_PATH:/api}
+
+  hateoas:
+    use-hal-as-default-json-media-type: ${SPRING_HATEOAS_USE_HAL:false}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
+
+  datasource:
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.mariadb.jdbc.Driver}
+    username: ${SPRING_DATASOURCE_USERNAME:fardin}
+    password: ${SPRING_DATASOURCE_PASSWORD:12345}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://localhost:3306/product_service}
+
+  servlet:
+    multipart:
+      enabled: ${SPRING_SERVLET_MULTIPART_ENABLED:true}
+      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:5MB}
+      max-request-size: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:5MB}
+
+  web:
+    resources:
+      static-locations: ${SPRING_WEB_RESOURCES_STATIC_LOCATIONS:file:/home/noorzai/uploads/images/}

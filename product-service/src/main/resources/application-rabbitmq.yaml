@@ -1,53 +1,17 @@
 spring:
-  config:
-    import: optional:configserver:http://localhost:8888
-
-  data:
-    rest:
-      base-path: /api
-
-  hateoas:
-    use-hal-as-default-json-media-type: false
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-    username: fardin
-    password: 12345
-    url: jdbc:mariadb://localhost:3306/product_service
-
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
     listener:
       simple:
-        concurrency: 1
-        max-concurrency: 5
+        concurrency: ${SPRING_RABBITMQ_LISTENER_CONCURRENCY:1}
+        max-concurrency: ${SPRING_RABBITMQ_LISTENER_MAX_CONCURRENCY:5}
         retry:
-          enabled: true
-          max-attempts: 3
-          initial-interval: 1000
+          enabled: ${SPRING_RABBITMQ_LISTENER_RETRY_ENABLED:true}
+          max-attempts: ${SPRING_RABBITMQ_LISTENER_RETRY_MAX_ATTEMPTS:3}
+          initial-interval: ${SPRING_RABBITMQ_LISTENER_RETRY_INITIAL_INTERVAL:1000}
     template:
-      exchange: product-validation.exchange
-      routing-key: product-validation
-
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: 5MB
-      max-request-size: 5MB
-
-  web:
-    resources:
-      static-locations: file:/home/noorzai/uploads/images/
-
-logging:
-  level:
-    org.springframework.web: DEBUG
-    org.springframework.security: DEBUG
+      exchange: ${SPRING_RABBITMQ_TEMPLATE_EXCHANGE:product-validation.exchange}
+      routing-key: ${SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY:product-validation}

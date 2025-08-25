@@ -21,7 +21,8 @@ public class SecurityConfigs {
                 csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorizationManagerRequestMatcherRegistry ->{
-                    authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
+                    authorizationManagerRequestMatcherRegistry.requestMatchers("/actuator/**").permitAll()
+                            .anyRequest().authenticated();
                 }))
                 .build();
     }

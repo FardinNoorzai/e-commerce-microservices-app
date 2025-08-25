@@ -7,6 +7,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -18,6 +19,7 @@ public class KafkaPublisher implements CheckoutPublisher {
 
     @Override
     public void publish(CheckoutEvent checkoutEvent) {
+        checkoutEvent.setTimestamp(Instant.now().toEpochMilli());
         CompletableFuture<SendResult<String, CheckoutEvent>> future = kafkaTemplate.send("checkout", checkoutEvent);
         future.thenAccept(result -> {
             System.out.println("✅ Sent to Kafka:");

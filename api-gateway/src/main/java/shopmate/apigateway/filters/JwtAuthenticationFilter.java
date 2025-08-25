@@ -31,6 +31,7 @@ public class JwtAuthenticationFilter implements WebFilter {
                 request.getURI().getPath().contains("/api/users/auth/validate") ||
                 request.getURI().getPath().contains("/api/products/images/") ||
                 request.getURI().getPath().contains("/api/products/categories") ||
+                request.getURI().getPath().contains("/actuator/prometheus") ||
                 request.getURI().getPath().contains("/api/products")) {
             logger.info("Skipping authentication for: {}", request.getURI().getPath());
             return chain.filter(exchange);

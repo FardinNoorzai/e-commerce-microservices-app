@@ -1,20 +1,53 @@
 spring:
   config:
-    import: optional:configserver:http://localhost:8888
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
     listener:
       simple:
-        concurrency: 1        # how many concurrent consumers
-        max-concurrency: 5    # max number of concurrent consumers
+        concurrency: ${RABBITMQ_LISTENER_CONCURRENCY:1}
+        max-concurrency: ${RABBITMQ_LISTENER_MAX_CONCURRENCY:5}
         retry:
-          enabled: true       # Enable retry logic
-          max-attempts: 3
-          initial-interval: 1000
+          enabled: ${RABBITMQ_LISTENER_RETRY_ENABLED:true}
+          max-attempts: ${RABBITMQ_LISTENER_RETRY_MAX:3}
+          initial-interval: ${RABBITMQ_LISTENER_RETRY_INTERVAL:1000}
     template:
-      exchange: user-validation.exchange
-      routing-key: user-validation
+      exchange: ${RABBITMQ_EXCHANGE:user-validation.exchange}
+      routing-key: ${RABBITMQ_ROUTING_KEY:user-validation}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    enabled: true
+  otlp:
+    tracing:
+      endpoint: ${OTEL_TRACING_ENDPOINT:http://localhost:4318}
+    metrics:
+      endpoint: ${OTEL_METRICS_ENDPOINT:http://localhost:4318}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: ${EUREKA_LEASE_RENEWAL:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_LEASE_EXPIRATION:30}
+    hostname: ${HOSTNAME:localhost}

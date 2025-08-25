@@ -15,10 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class InventoryService {
@@ -33,24 +33,44 @@ public class InventoryService {
     public InventoryValidationEvent calculateInventory(CheckoutEvent event) {
         boolean isValid = true;
         Transaction transaction = new Transaction();
-        for (CartItem cartItem : event.getCartItems()) {
-            BigDecimal transactionTotal = BigDecimal.ZERO;
 
-            List<Item> savedItems = itemRepository.findByProductId(cartItem.getProductId().intValue());
-            BigDecimal entryTotal = productEntryRepository
-                    .calculateInventoryByProductId(cartItem.getProductId().intValue())
-                    .orElse(BigDecimal.ZERO);
+        List<Integer> productIds = event.getCartItems()
+                .stream()
+                .map(cartItem -> cartItem.getProductId().intValue())
+                .collect(Collectors.toList());
 
-            for (Item savedItem : savedItems) {
-                if (!InventoryStates.REJECTED.equals(savedItem.getTransaction().getState())) {
-                    transactionTotal = transactionTotal.add(savedItem.getQuantity());
-                }
+        List<Item> savedItems = itemRepository.findByProductIdIn(productIds);
+
+        Map<Integer, BigInteger> productInventoryTotalsRaw = productEntryRepository
+                .calculateInventoryByProductIds(productIds)
+                .stream()
+                .collect(Collectors.toMap(InventoryTotal::getProductId, InventoryTotal::getTotal));
+
+        Map<Integer, BigDecimal> productInventoryTotals = productInventoryTotalsRaw.entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> new BigDecimal(e.getValue())
+                ));
+
+        Map<Integer, BigDecimal> productTransactionTotals = new HashMap<>();
+        for (Item item : savedItems) {
+            if (!InventoryStates.REJECTED.equals(item.getTransaction().getState())) {
+                Integer pid = item.getProductId();
+                BigDecimal qty = item.getQuantity();
+                productTransactionTotals.merge(pid, qty, BigDecimal::add);
             }
+        }
 
-            BigDecimal currentRequestedQty = new BigDecimal(cartItem.getQuantity());
-            if (transactionTotal.add(currentRequestedQty).compareTo(entryTotal) > 0) {
+        for (CartItem cartItem : event.getCartItems()) {
+            Integer pid = cartItem.getProductId().intValue();
+            BigDecimal requestedQty = BigDecimal.valueOf(cartItem.getQuantity());
+            BigDecimal totalInventory = productInventoryTotals.getOrDefault(pid, BigDecimal.ZERO);
+            BigDecimal currentTransactionTotal = productTransactionTotals.getOrDefault(pid, BigDecimal.ZERO);
+
+            if (currentTransactionTotal.add(requestedQty).compareTo(totalInventory) > 0) {
                 isValid = false;
-                System.out.println("now enough inventory quiting...");
+                System.out.println("Not enough inventory for productId: " + pid);
                 break;
             }
         }
@@ -60,19 +80,95 @@ public class InventoryService {
         transaction.setTimestamp(LocalDateTime.now());
         transaction.setState(isValid ? InventoryStates.HOLD : InventoryStates.REJECTED);
 
-        List<Item> items = new ArrayList<>();
-        for (CartItem cartItem : event.getCartItems()) {
+        List<Item> items = event.getCartItems().stream().map(cartItem -> {
             Item item = new Item();
             item.setProductId(cartItem.getProductId().intValue());
             item.setQuantity(BigDecimal.valueOf(cartItem.getQuantity()));
             item.setTransaction(transaction);
-            items.add(item);
-        }
+            return item;
+        }).collect(Collectors.toList());
 
         transaction.setItems(items);
         transactionRepository.save(transaction);
 
+        InventoryValidationEvent e = new InventoryValidationEvent();
+        e.setValid(isValid);
+        e.setCheckoutId(event.getId());
+        e.setInventoryId(transaction.getId());
+        return e;
+    }
 
+    @Transactional
+    public InventoryValidationEvent insertOrderWithoutInventoryCheck(CheckoutEvent event) {
+        Transaction transaction = new Transaction();
+        transaction.setUsername(event.getUsername());
+        transaction.setCheckoutId(event.getId());
+        transaction.setTimestamp(LocalDateTime.now());
+        transaction.setState(InventoryStates.HOLD);
+        List<Item> items = event.getCartItems().stream().map(cartItem -> {
+            Item item = new Item();
+            item.setProductId(cartItem.getProductId().intValue());
+            item.setQuantity(BigDecimal.valueOf(cartItem.getQuantity()));
+            item.setTransaction(transaction);
+            return item;
+        }).collect(Collectors.toList());
+
+        transaction.setItems(items);
+        transactionRepository.save(transaction);
+
+        InventoryValidationEvent response = new InventoryValidationEvent();
+        response.setValid(true);
+        response.setCheckoutId(event.getId());
+        response.setInventoryId(transaction.getId());
+
+        return response;
+    }
+
+    @Transactional
+    public InventoryValidationEvent randomCheck(CheckoutEvent event) {
+        boolean isValid;
+
+        // Extract all product IDs from cart
+        List<Long> productIds = event.getCartItems().stream()
+                .map(CartItem::getProductId)
+                .toList();
+
+        Set<Long> allowedProducts = Set.of(13L, 18L);
+
+        // Check if only 13 and/or 18 are present
+        boolean allAllowed = productIds.stream().allMatch(allowedProducts::contains);
+        isValid = allAllowed;
+
+        // But also enforce count rule: max 2 items allowed
+        if (isValid && productIds.size() > 2) {
+            isValid = false;
+        }
+
+        if (!isValid) {
+            System.out.println("❌ Inventory Rejected: Product(s) not allowed or too many.");
+        } else {
+            System.out.println("✅ Inventory Approved for: " + productIds);
+        }
+
+        // You can still create a transaction record if needed
+        Transaction transaction = new Transaction();
+        transaction.setUsername(event.getUsername());
+        transaction.setCheckoutId(event.getId());
+        transaction.setTimestamp(LocalDateTime.now());
+        transaction.setState(isValid ? InventoryStates.HOLD : InventoryStates.REJECTED);
+
+        List<Item> items = event.getCartItems().stream().map(cartItem -> {
+            Item item = new Item();
+            item.setProductId(cartItem.getProductId().intValue());
+            item.setQuantity(BigDecimal.valueOf(cartItem.getQuantity()));
+            item.setTransaction(transaction);
+            return item;
+        }).toList();
+
+        transaction.setItems(items);
+        transactionRepository.save(transaction);
+
+        // Return event
         InventoryValidationEvent e = new InventoryValidationEvent();
         e.setValid(isValid);
         e.setCheckoutId(event.getId());
@@ -80,6 +176,8 @@ public class InventoryService {
 
         return e;
     }
+
+
 
 
     public void updateOrderStatus(PaymentSuccessDto message) {

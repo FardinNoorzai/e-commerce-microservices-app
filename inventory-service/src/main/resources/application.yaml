@@ -1,40 +1,60 @@
 spring:
   data:
     rest:
-      base-path: api/inventory
+      base-path: ${DATA_REST_BASE_PATH:api/inventory}
+
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
+
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    username: fardin
-    password: 12345
-    url: jdbc:mariadb://localhost:3306/inventory_service
+    url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:inventory_service}
+    username: ${DB_USERNAME:fardin}
+    password: ${DB_PASSWORD:12345}
+
   kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-      bootstrap-servers: localhost:9092
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: '*'
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      bootstrap-servers: localhost:9092
-
-
 
 server:
-  port: 8030
+  port: ${SERVER_PORT:8030}
+
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
 
-
 jwt:
-  secret: e1ad65c2e438d1805ae31d851c5756506d052b42ecdaebd3f88dba6f2caa18d239dd6cab8e0ede6736533e7104d1a5b85c340dffc7422037cb52aa7e5a741801064dacaa234f4626ea2158adf5768191dd6747b796d5b71bc4215cc61cc4e349812ff0b89046c752b9923dcbc1540a77ae6e69a188ebf879ee6fe767ee6648659b7e428568bfc6ed46e03a9db8a2c140a5d01adb45ddc30deae36b05ddf2f641e188d0571a81a4afe666bc1e551523fa5c069c29c9d787ede0664ac030541ae12a520066bc1573d99ea1d0d97bb1f5d1c5cfd6f6899d72f26e9204d1377404862198a369b5f2995c3982e6eca23c2aaf713c85feb9948fe90b86c7681f820c5c
-  expiration: 86400000
+  secret: ${JWT_SECRET:e1ad65c2e438d1805ae31d851c5756506d052b42ecdaebd3f88dba6f2caa18d239dd6cab8e0ede6736533e7104d1a5b85c340dffc7422037cb52aa7e5a741801064dacaa234f4626ea2158adf5768191dd6747b796d5b71bc4215cc61cc4e349812ff0b89046c752b9923dcbc1540a77ae6e69a188ebf879ee6fe767ee6648659b7e428568bfc6ed46e03a9db8a2c140a5d01adb45ddc30deae36b05ddf2f641e188d0571a81a4afe666bc1e551523fa5c069c29c9d787ede0664ac030541ae12a520066bc1573d99ea1d0d97bb1f5d1c5cfd6f6899d72f26e9204d1377404862198a369b5f2995c3982e6eca23c2aaf713c85feb9948fe90b86c7681f820c5c}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    enabled: true
+  otlp:
+    tracing:
+      endpoint: ${OTEL_TRACING_ENDPOINT:http://localhost:4318}
+    metrics:
+      endpoint: ${OTEL_METRICS_ENDPOINT:http://localhost:4318}
+  prometheus:
+    metrics:
+      export:
+        enabled: true

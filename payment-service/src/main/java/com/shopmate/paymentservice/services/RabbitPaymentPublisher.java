@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @Profile("rabbitmq")
 public class RabbitPaymentPublisher implements PaymentPublisher {
@@ -19,6 +21,7 @@ public class RabbitPaymentPublisher implements PaymentPublisher {
 
     @Override
     public void publish(PaymentCompletedEvent event) {
+        event.setTimestamp(Instant.now().toEpochMilli());
         rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, event);
     }
 }

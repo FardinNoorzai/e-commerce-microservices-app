@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import shopmate.userservice.models.User;
 
+import java.time.Instant;
+
 @Service
 @Profile("rabbitmq")
 public class RabbitPublisher implements UserValidationPublisher {
@@ -43,6 +45,7 @@ public class RabbitPublisher implements UserValidationPublisher {
     }
 
     public void sendUserValidationEvent(UserValidationEvent event) {
+        event.setTimestamp(Instant.now().toEpochMilli());
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY, event);
         System.out.println("✅ Sent UserValidationEvent to RabbitMQ");
     }

@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @Profile("rabbitmq")
 public class RabbitMQOrderListener {
@@ -21,7 +23,8 @@ public class RabbitMQOrderListener {
 
     @RabbitListener(queues = "checkout.queue.inventoryservice")
     public void checkout(CheckoutEvent order) {
-        InventoryValidationEvent inventoryValidationEvent = inventoryService.calculateInventory(order);
+        InventoryValidationEvent inventoryValidationEvent = inventoryService.randomCheck(order);
+        inventoryValidationEvent.setTimestamp(Instant.now().toEpochMilli());
         rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, inventoryValidationEvent);
         System.out.println("Sent InventoryValidationEvent to RabbitMQ");
     }
